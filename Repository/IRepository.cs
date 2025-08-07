@@ -13,6 +13,5 @@ namespace Repository
         Task<GenericResponse<bool>> DeleteAsync(int id);
         Task<GenericResponse<bool>> InsertManyAsync(List<TEntity> data);
         Task<GenericResponse<bool>> UpdateManyAsync(List<TEntity> dataList);
-        Task<GenericResponse<bool>> DeleteManyAsync(List<TEntity> data);
     }
 }

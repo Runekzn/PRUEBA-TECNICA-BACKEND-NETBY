@@ -37,7 +37,7 @@ namespace Authentication.Controllers
             //generacion del token
             var tokenValidator = new TokenGeneratorContext(new TokenAdrian(new CtorTokenGeneratorRequest() { Algorithm = Encrypt.Enums.EncryptAlgorithm.AES, CypherMode = Encrypt.Enums.EncryptedMode.SHA256, SecretKey = Key.key , Rol = authenticate.Data.Rol, UserId = authenticate.Data.userId}));
 
-            var generateToken = await tokenValidator.GenerateToken();
+            var generateToken = await tokenValidator.GenerateToken(authenticate.Data.userId);
 
             return Ok(generateToken);
         }

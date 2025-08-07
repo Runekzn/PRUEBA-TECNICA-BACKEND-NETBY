@@ -1,4 +1,5 @@
 using API_GATEWAY.Models;
+using Encrypt.Resources;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 using System.Text.Json;
@@ -66,7 +67,8 @@ app.Run();
 //metodo que se usara en el mapmethods
 async Task HandleRequest(HttpContext context, string targetUri, TokenGeneratorContext tokenGeneratorContext, API_GATEWAY.Models.Endpoint endpointConfiguration)
 {
-    string[] partes = [];
+    string rol = string.Empty;
+    int id = 0; 
     Console.Write("handdle request");
     if (Convert.ToBoolean(endpointConfiguration.AllowAuthentication))
     {
@@ -80,9 +82,10 @@ async Task HandleRequest(HttpContext context, string targetUri, TokenGeneratorCo
 
             var tokenValidator = new TokenGeneratorContext(new TokenAdrian( new CtorTokenGeneratorRequest() { Algorithm = Encrypt.Enums.EncryptAlgorithm.AES, CypherMode = Encrypt.Enums.EncryptedMode.SHA256, SecretKey = Key.key}));
             var validToken = await tokenValidator.ValidateToken(authorizationContextString);
-            partes = authorizationContextString.Split('_');
+            rol = validToken.Data.Rol;  
+            id = validToken.Data.UserId;
 
-            if (!validToken.Data)
+            if (!validToken.Data.IsValid)
             {
                 throw (new Exception("No es un token valido"));
             }
@@ -95,16 +98,11 @@ async Task HandleRequest(HttpContext context, string targetUri, TokenGeneratorCo
 
     var client = app.Services.GetRequiredService<HttpClient>();
 
-    var rol = string.Empty;
-    if (partes.Length > 0)
-    {
-        rol = partes[1];
-    }
 
     // Generar el token usando el TokenGeneratorContext pasado como parámetro
-    tokenGeneratorContext = new TokenGeneratorContext( new JWT( new CtorTokenGeneratorRequest() { Algorithm = Encrypt.Enums.EncryptAlgorithm.AES, CypherMode = Encrypt.Enums.EncryptedMode.SHA256, SecretKey = Key.key, Rol = rol } ));
+    tokenGeneratorContext = new TokenGeneratorContext( new JWT( new CtorTokenGeneratorRequest() { Algorithm = Encrypt.Enums.EncryptAlgorithm.AES, CypherMode = Encrypt.Enums.EncryptedMode.SHA256, SecretKey = Key.key, Rol = rol , UserId = id} ));
 
-    var token = await tokenGeneratorContext.GenerateToken();
+    var token = await tokenGeneratorContext.GenerateToken(id);
 
     if (!token.Success || token.Data == null)
     {

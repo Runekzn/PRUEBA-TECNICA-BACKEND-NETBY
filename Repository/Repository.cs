@@ -59,35 +59,6 @@ namespace Repository
             return response;
         }
 
-        public async Task<GenericResponse<bool>> DeleteManyAsync(List<TEntity> data)
-        {
-            var response = new GenericResponse<bool>();
-
-            try
-            {
-                // Obtener la entidad usando el ID dinámicamente
-                foreach (var entity in data)
-                {
-                    dbSet.Attach(entity);
-                    dbContext.Entry(entity).State = EntityState.Deleted;
-                }
-
-                await dbContext.SaveChangesAsync();
-
-                response.Data = true;
-                response.Message = "OK";
-                response.Success = true;
-            }
-            catch (Exception ex)
-            {
-                response.Data = false;
-                response.Message = $"Error al eliminar : {ex.Message}";
-                response.Success = false;
-            }
-
-            return response;
-        }
-
         public async Task<GenericResponse<List<TEntity>>> GetAllAsync()
         {
             try

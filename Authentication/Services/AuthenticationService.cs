@@ -64,7 +64,8 @@ namespace Authentication.Services
             {
                 Data = new Auth()
                 {
-                    Rol = nombreRol.RolName
+                    Rol = nombreRol.RolName,
+                    userId = userExist.Id
                 },
                 Success = true,
                 Message = "Autenticacion correcta"

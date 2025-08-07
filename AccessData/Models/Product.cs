@@ -21,6 +21,8 @@ public partial class Product
 
     public int ProCreatedBy { get; set; }
 
+    public bool? Status { get; set; }
+
     public virtual Categorium ProCategoriaNavigation { get; set; } = null!;
 
     public virtual User ProCreatedByNavigation { get; set; } = null!;

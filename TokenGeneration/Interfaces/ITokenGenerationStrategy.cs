@@ -5,8 +5,8 @@ namespace TokenGeneration.Interfaces
 {
     public interface ITokenGenerationStrategy
     {
-        Task<GenericResponse<GenerateTokenResponse>> GenerateToken();
+        Task<GenericResponse<GenerateTokenResponse>> GenerateToken(int id);
 
-        Task<GenericResponse<bool>> PersonalTokenValidation(string Token);
+        Task<GenericResponse<TokenValid>> PersonalTokenValidation(string Token);
     }
 }

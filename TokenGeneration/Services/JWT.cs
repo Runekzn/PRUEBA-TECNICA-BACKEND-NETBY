@@ -22,31 +22,35 @@ namespace TokenGeneration.Services
             this.request = request;
         }
 
-        public Task<GenericResponse<bool>> PersonalTokenValidation(string Token)
+        public Task<GenericResponse<TokenValid>> PersonalTokenValidation(string Token)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<GenericResponse<GenerateTokenResponse>> GenerateToken()
+        public async Task<GenericResponse<GenerateTokenResponse>> GenerateToken(int id)
         {
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.ASCII.GetBytes(request.SecretKey);
 
+                var claims = new List<Claim>
+                {
+                    new Claim(SecurityResources.Claims.CL_Type, SecurityResources.Claims.CL_Value),
+                    new Claim(ClaimTypes.NameIdentifier, id.ToString())
+                };
+
+                if (!string.IsNullOrEmpty(request.Rol))
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, request.Rol));
+                }
+
                 var tokenDescriptor = new SecurityTokenDescriptor
                 {
-                    Subject = new ClaimsIdentity(new[] 
-                    { new Claim(SecurityResources.Claims.CL_Type, SecurityResources.Claims.CL_Value)  , new Claim(ClaimTypes.NameIdentifier, request.UserId.ToString())}),// Claim para indicar que proviene del gateway
-                    Expires = DateTime.UtcNow.AddMinutes(30),// Duración del token
+                    Subject = new ClaimsIdentity(claims),
+                    Expires = DateTime.UtcNow.AddMinutes(30),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
-                if (!string.IsNullOrEmpty(request.Rol)) 
-                {
-
-                    tokenDescriptor.Subject = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Role, request.Rol) });
-
-                }
                 //Creación del Token
                 var securityToken = tokenHandler.CreateToken(tokenDescriptor);
                 var token = tokenHandler.WriteToken(securityToken);

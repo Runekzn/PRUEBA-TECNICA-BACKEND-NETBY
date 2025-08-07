@@ -13,12 +13,12 @@ namespace TokenGeneration.Context
             this.tokenGenerationStrategy = tokenGenerationStrategy;
         }
 
-        public async Task<GenericResponse<GenerateTokenResponse>> GenerateToken()
+        public async Task<GenericResponse<GenerateTokenResponse>> GenerateToken(int id)
         {
-            return await tokenGenerationStrategy.GenerateToken();
+            return await tokenGenerationStrategy.GenerateToken(id);
         }
 
-        public async Task<GenericResponse<bool>> ValidateToken(string token)
+        public async Task<GenericResponse<TokenValid>> ValidateToken(string token)
         {
             return await tokenGenerationStrategy.PersonalTokenValidation(token);
         }
