@@ -1,11 +1,21 @@
+using AccessData.Models;
+using Microsoft.EntityFrameworkCore;
+using Repository;
+using Transacciones.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+var stringConnection = builder.Configuration.GetConnectionString("DatabaseConnection");
+builder.Services.AddDbContext<InventarioContext>(options =>
+   options.UseSqlServer(stringConnection));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 
 var app = builder.Build();
 

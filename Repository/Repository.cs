@@ -25,7 +25,7 @@ namespace Repository
                 if (entity != null)
                 {
                     var statusProperty = entity.GetType().GetProperty("Status");
-                    if (statusProperty != null && statusProperty.PropertyType == typeof(bool))
+                    if (statusProperty?.PropertyType == typeof(bool))
                     {
                         statusProperty.SetValue(entity, false);
                         dbContext.Entry(entity).State = EntityState.Modified;

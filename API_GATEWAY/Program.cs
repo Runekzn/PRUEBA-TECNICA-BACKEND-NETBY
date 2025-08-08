@@ -59,6 +59,7 @@ app.UseEndpoints(endpoints =>
     }
 });
 
+
 app.MapControllers();
 
 app.Run();
@@ -111,17 +112,63 @@ async Task HandleRequest(HttpContext context, string targetUri, TokenGeneratorCo
         return;
     }
 
+    //parte para los put y delete
+    static string ResolveTemplateWithRouteValues(string template, RouteValueDictionary routeValues)
+    {
+        var resolved = template ?? "";
+        foreach (var kv in routeValues)
+        {
+            var placeholder = "{" + kv.Key + "}";
+            resolved = resolved.Replace(placeholder, kv.Value?.ToString() ?? "", StringComparison.OrdinalIgnoreCase);
+        }
+        return resolved;
+    }
+    var resolvedTarget = ResolveTemplateWithRouteValues(targetUri, context.Request.RouteValues);
+
+    var ub = new UriBuilder(resolvedTarget);
+    if (context.Request.QueryString.HasValue)
+    {
+        ub.Query = context.Request.QueryString.Value!.TrimStart('?');
+    }
+    var finalTargetUri = ub.Uri;
+
+    //parte para los put y delete
+
+
     var requestMessage = new HttpRequestMessage
     {
         Method = new HttpMethod(context.Request.Method),
-        RequestUri = new Uri(targetUri)
+        RequestUri = finalTargetUri
     };
 
-    if (context.Request.Method == HttpMethods.Post)
-    {
-        var requestBody = await new StreamReader(context.Request.Body).ReadToEndAsync();
+    var method = context.Request.Method;
 
-        requestMessage.Content = new StringContent(requestBody, System.Text.Encoding.UTF8, "application/json");
+    if (HttpMethods.IsPost(method) ||
+        HttpMethods.IsPut(method) ||
+        HttpMethods.IsPatch(method) ||
+        (HttpMethods.IsDelete(method) && (context.Request.ContentLength ?? 0) > 0))
+    {
+        context.Request.EnableBuffering(); // permite leer sin “consumir” el stream
+
+        using var reader = new StreamReader(context.Request.Body, leaveOpen: true);
+        var body = await reader.ReadToEndAsync();
+        context.Request.Body.Position = 0;
+
+        var contentType = context.Request.ContentType ?? "application/json";
+        requestMessage.Content = new StringContent(body, System.Text.Encoding.UTF8, contentType);
+    }
+    
+    foreach (var header in context.Request.Headers)
+    {
+        if (header.Key.Equals("Host", StringComparison.OrdinalIgnoreCase))
+            continue;
+
+        // Primero intenta como header general...
+        if (!requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray()))
+        {
+            // ...si no, como header de contenido
+            requestMessage.Content?.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+        }
     }
 
     requestMessage.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.Data?.Token);

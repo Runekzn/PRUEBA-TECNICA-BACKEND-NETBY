@@ -23,7 +23,7 @@ public partial class Transaction
 
     public int TraUserExecuted { get; set; }
 
-    public bool? Status { get; set; }
+    public bool Status { get; set; }
 
     public virtual Product TraProductoNavigation { get; set; } = null!;
 

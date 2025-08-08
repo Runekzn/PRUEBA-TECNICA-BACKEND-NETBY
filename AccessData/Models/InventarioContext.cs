@@ -31,7 +31,7 @@ public partial class InventarioContext : DbContext
     {
         modelBuilder.Entity<Categorium>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Categori__3214EC077407B6C0");
+            entity.HasKey(e => e.Id).HasName("PK__Categori__3214EC071C9AFB3D");
 
             entity.Property(e => e.CatNombre)
                 .HasMaxLength(100)
@@ -40,7 +40,7 @@ public partial class InventarioContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Products__3214EC07F186388E");
+            entity.HasKey(e => e.Id).HasName("PK__Products__3214EC07C00E6E50");
 
             entity.Property(e => e.ProDescripcion)
                 .HasMaxLength(1000)
@@ -64,14 +64,14 @@ public partial class InventarioContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Roles__3214EC074F01540E");
+            entity.HasKey(e => e.Id).HasName("PK__Roles__3214EC07612B66ED");
 
             entity.Property(e => e.RolName).HasMaxLength(100);
         });
 
         modelBuilder.Entity<Transaction>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Transact__3214EC07222930E9");
+            entity.HasKey(e => e.Id).HasName("PK__Transact__3214EC073792E145");
 
             entity.Property(e => e.TraDescripcion)
                 .HasMaxLength(10)
@@ -96,7 +96,7 @@ public partial class InventarioContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC076E7EE736");
+            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC07239346E0");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UserEmail).HasMaxLength(100);
@@ -105,7 +105,7 @@ public partial class InventarioContext : DbContext
 
         modelBuilder.Entity<UserRole>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__UserRole__3214EC07A351DEA7");
+            entity.HasKey(e => e.Id).HasName("PK__UserRole__3214EC071342018B");
 
             entity.ToTable("UserRole");
 

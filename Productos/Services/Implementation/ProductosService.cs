@@ -16,34 +16,54 @@ namespace Productos.Services.Implementation
         public ProductosService(InventarioContext inventarioContext, IRepository<Product, InventarioContext> repository)
         {
             this.inventarioContext = inventarioContext;
-            this.repository  = repository;
+            this.repository = repository;
         }
         public async Task<GenericResponse<bool>> CreateAsync(ProductoRequest request, int u)
         {
             try
             {
-                var producto = new Product
+                var producExist = await inventarioContext.Set<Product>()
+                    .Where(x => x.ProNombre == request.ProNombre && x.ProCategoria == request.ProCategoria)
+                    .FirstOrDefaultAsync();
+
+                var insert = new GenericResponse<bool>();
+
+                if (producExist == null)
                 {
-                    ProCategoria = request.ProCategoria,
-                    ProDescripcion = request.ProDescripcion,
-                    ProCreatedBy = u,
-                    ProImagen = request.ProImagen,
-                    ProNombre = request.ProNombre,
-                    ProPrecio = request.ProPrecio,
-                    ProStock = request.ProStock,
-                };
+                    var producto = new Product
+                    {
+                        ProCategoria = request.ProCategoria,
+                        ProDescripcion = request.ProDescripcion,
+                        ProCreatedBy = u,
+                        ProImagen = request.ProImagen,
+                        ProNombre = request.ProNombre,
+                        ProPrecio = request.ProPrecio,
+                        ProStock = request.ProStock,
+                        Status = true
+                    };
 
-                var insert = await repository.InsertAsync(producto);
+                    insert = await repository.InsertAsync(producto);
 
-                if (insert.Success)
+                    if (insert.Success)
+                    {
+                        return new GenericResponse<bool>
+                        {
+                            Data = true,
+                            Success = true,
+                            Message = "Producto creado exitosamente"
+                        };
+                    }
+                }
+                else
                 {
                     return new GenericResponse<bool>
                     {
-                        Data = true,
-                        Success = true,
-                        Message = "Producto creado exitosamente"
+                        Data = false,
+                        Success = false,
+                        Message = "El producto ya existe en la base de datos"
                     };
                 }
+
 
                 return new GenericResponse<bool>
                 {
@@ -94,14 +114,17 @@ namespace Productos.Services.Implementation
             try
             {
                 var getProducto = await repository.GetAllAsync();
-                
+
+                var dataFinal =  getProducto.Data.Where(x => x.Status == true).ToList();
+
                 List<ProductosResponse> list = new List<ProductosResponse>();
 
-                foreach (var item in getProducto.Data)
+                foreach (var item in dataFinal)
                 {
                     var userName = await inventarioContext.Set<User>().Where(x => x.Id == item.ProCreatedBy).Select(x => x.UserName).FirstOrDefaultAsync();
                     var data = new ProductosResponse
                     {
+                        Id = item.Id,
                         ProCategoria = item.ProCategoria,
                         ProDescripcion = item.ProDescripcion,
                         ProImagen = item.ProImagen,
@@ -112,13 +135,13 @@ namespace Productos.Services.Implementation
                     };
                     list.Add(data);
                 }
-                
+
 
                 return new GenericResponse<List<ProductosResponse>>()
                 {
                     Data = list,
                     Success = false,
-                    Message = "Se obtivieron  los datos adecuadamente"
+                    Message = "Se obtivieron los datos adecuadamente"
                 };
 
             }
@@ -155,13 +178,13 @@ namespace Productos.Services.Implementation
                 {
                     Data = data,
                     Success = true,
-                    Message = "Se obtivieron  los datos adecuadamente"
+                    Message = "Se obtivieron los datos adecuadamente"
                 };
 
             }
             catch (Exception ex)
             {
-                return new ()
+                return new()
                 {
                     Data = null,
                     Success = false,
@@ -176,6 +199,15 @@ namespace Productos.Services.Implementation
             {
                 var getProducto = await repository.GetByIdAsync(id);
 
+                if (getProducto.Data == null)
+                {
+                    return new()
+                    {
+                        Data = false,
+                        Message = "El producto no existe ",
+                        Success = false
+                    };
+                }
 
                 getProducto.Data.ProCategoria = request.ProCategoria;
                 getProducto.Data.ProDescripcion = request.ProDescripcion;

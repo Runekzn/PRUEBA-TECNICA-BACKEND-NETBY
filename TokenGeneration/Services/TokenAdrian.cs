@@ -43,7 +43,7 @@ namespace TokenGeneration.Services
                     Text = Token
                 });
 
-                var tokenSplit = tokenFinal.Data.Text.Split('#');
+                var tokenSplit = tokenFinal.Data.Text.Split('#');//2026#9#RJZYGNAAKxJuNza6cXIE#AB_Admin
 
                 if (Convert.ToInt32(tokenSplit[0]) <= DateTime.Now.Year)
                 {

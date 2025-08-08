@@ -15,7 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AccessData\AccessData.csproj" />
     <ProjectReference Include="..\Repository\Repository.csproj" />
+    <ProjectReference Include="..\TokenGeneration\TokenGeneration.csproj" />
   </ItemGroup>
 
 </Project>
