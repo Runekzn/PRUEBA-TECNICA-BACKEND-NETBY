@@ -5,7 +5,6 @@
         public int ProductId { get; set; }
         public string ProductName { get; set; } = "";
         public int CurrentStock { get; set; }
-        public string Unit { get; set; } = "unidad"; // opcional si existe en Products
 
         public TransactionHistoryFilters Filters { get; set; } = new();
         public int Total { get; set; }           // total de registros que cumplen el filtro
@@ -34,6 +33,5 @@
         public decimal TotalPrice { get; set; }
         public string? Description { get; set; }
         public int UserExecutedId { get; set; }
-        public string? Warehouse { get; set; }       // si llegas a tener almacén
     }
 }

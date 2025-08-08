@@ -29,23 +29,35 @@ namespace Transacciones.Services
                 var sort = string.IsNullOrWhiteSpace(request.sort) ? "dateDesc" : request.sort;
 
                 // Base query: por producto y activos
-                var q = inventarioContext.Transactions.AsNoTracking()
-                    .Where(t => t.Status && t.TraProducto == request.productId);
+                var q = new List<Transaction>();
+                if(request.productId != 0)
+                {
+                    q = await (inventarioContext.Transactions.AsNoTracking()
+                    .Where(
+                    t => t.TraProducto == request.productId //busco el producto
+                    && t.TraFechaRealizada >= request.from //valido la fecha desde
+                    && t.TraFechaRealizada <= request.to //valido la fecha hasta
+                    && t.TraTipoTransaccion == request.type //valido el tipo de transacción (Compra o Venta)
+                    )).ToListAsync();
+                }
+                else
+                {
+                    q = await (inventarioContext.Transactions.AsNoTracking()
+                    .Where(
+                    t => t.TraFechaRealizada >= request.from //valido la fecha desde
+                    && t.TraFechaRealizada <= request.to //valido la fecha hasta
+                    && t.TraTipoTransaccion == request.type //valido el tipo de transacción (Compra o Venta)
+                    )).ToListAsync();
 
-                if (request.from.HasValue) q = q.Where(t => t.TraFechaRealizada >= request.from.Value);
-                if (request.to.HasValue) q = q.Where(t => t.TraFechaRealizada <= request.to.Value);
-                if (!string.IsNullOrWhiteSpace(request.type)) q = q.Where(t => t.TraTipoTransaccion == request.type);
+                }
 
-                // Orden
-                q = sort.Equals("dateAsc", StringComparison.OrdinalIgnoreCase)
-                    ? q.OrderBy(t => t.TraFechaRealizada).ThenBy(t => t.Id)
-                    : q.OrderByDescending(t => t.TraFechaRealizada).ThenByDescending(t => t.Id);
+
 
                 // Total para paginación
-                var total = await q.CountAsync();
+                var total = q.Count();
 
                 // Page
-                var items = await q
+                var items = (q
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .Select(t => new TransactionHistoryItem
@@ -58,8 +70,8 @@ namespace Transacciones.Services
                         TotalPrice = t.TraPrecioTotal,
                         Description = t.TraDescripcion,
                         UserExecutedId = t.TraUserExecuted
-                    })
-                    .ToListAsync();
+                    }))
+                    .ToList();
 
                 // Producto + stock actual
                 var product = await inventarioContext.Products.AsNoTracking()
@@ -67,8 +79,8 @@ namespace Transacciones.Services
                     .Select(p => new
                     {
                         p.Id,
-                        Name = EF.Property<string>(p, "Name"), // ajusta si tu columna tiene otro nombre
-                        Unit = EF.Property<string?>(p, "Unit") // si existe
+                        Name = EF.Property<string>(p, "ProNombre"), 
+                        Unit = EF.Property<int?>(p, "ProStock") 
                     })
                     .FirstOrDefaultAsync();
 
@@ -87,7 +99,6 @@ namespace Transacciones.Services
                             ProductId = product.Id,
                             ProductName = product.Name,
                             CurrentStock = currentStock,
-                            Unit = product.Unit ?? "unidad",
                             Filters = new TransactionHistoryFilters
                             {
                                 From = request.from,
@@ -127,6 +138,15 @@ namespace Transacciones.Services
                 foreach (var item in request.Productos)
                 {
                     var data = await inventarioContext.Set<Product>().Where(x => x.Id == item.ProId).FirstOrDefaultAsync();
+                    if (data == null)
+                    {
+                        return new()
+                        {
+                            Data = false,
+                            Success = false,
+                            Message = "El producto no existe"
+                        };
+                    }
                     var transaction = new Transaction
                     {
                         TraCantidad = item.Cantidad,
@@ -198,6 +218,15 @@ namespace Transacciones.Services
                 foreach (var item in request.Productos)
                 {
                     var data = await inventarioContext.Set<Product>().Where(x => x.Id == item.ProId).FirstOrDefaultAsync();
+                    if (data == null)
+                    {
+                        return new()
+                        {
+                            Data = false,
+                            Success = false,
+                            Message = "El producto no existe"
+                        };
+                    }
                     var transaction = new Transaction
                     {
                         TraCantidad = item.Cantidad,

@@ -32,19 +32,6 @@ namespace Transacciones.Controllers
                     Message = "El metodo no esta siendo invocado desde el Gateway"
                 });
             }
-
-            var idUsuario = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);//OBTENEMOS EL ID DEL USUARIO DEL TOKEN
-
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim.Equals("0"))
-            {
-                return BadRequest(new GenericResponse<bool>()
-                {
-                    Data = false,
-                    Success = false,
-                    Message = "El usuario no tiene un ID valido"
-                });
-            }
             var productos = await transactionService.PostCompraAsync(request);
 
             if (productos == null)
@@ -65,19 +52,6 @@ namespace Transacciones.Controllers
                     Message = "El metodo no esta siendo invocado desde el Gateway"
                 });
             }
-
-            var idUsuario = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);//OBTENEMOS EL ID DEL USUARIO DEL TOKEN
-
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim.Equals("0"))
-            {
-                return BadRequest(new GenericResponse<bool>()
-                {
-                    Data = false,
-                    Success = false,
-                    Message = "El usuario no tiene un ID valido"
-                });
-            }
             var productos = await transactionService.PostVentaAsync(request);
 
             if (productos == null)
@@ -86,7 +60,7 @@ namespace Transacciones.Controllers
             }
             return Ok(productos);
         }
-        [HttpGet("FiltroVentas")]
+        [HttpPost("FiltroVentas")]
         public async Task<IActionResult> GetFilterProducts(TransactionHistoryRequest req)
         {
             if (User.FindFirstValue(SecurityResources.Claims.CL_Type) != SecurityResources.Claims.CL_Value)
@@ -98,7 +72,7 @@ namespace Transacciones.Controllers
                     Message = "El metodo no esta siendo invocado desde el Gateway"
                 });
             }
-            var idUsuario = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);//OBTENEMOS EL ID DEL USUARIO DEL TOKEN
+            //var idUsuario = Convert.ToInt32(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);//OBTENEMOS EL ID DEL USUARIO DEL TOKEN
 
             var productos = await transactionService.GetAllTrasactions(req);
 
