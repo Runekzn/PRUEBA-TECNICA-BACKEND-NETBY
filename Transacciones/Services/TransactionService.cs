@@ -147,6 +147,17 @@ namespace Transacciones.Services
                             Message = "El producto no existe"
                         };
                     }
+
+                    if(data.ProStock < item.Cantidad)
+                    {
+                        return new GenericResponse<bool>()
+                        {
+                            Data = false,
+                            Message = $"No existe suficiente stock para hacer esta venta producto : {data.ProNombre.ToUpper()}",
+                            Success = false
+                        };
+                    }
+
                     var transaction = new Transaction
                     {
                         TraCantidad = item.Cantidad,
